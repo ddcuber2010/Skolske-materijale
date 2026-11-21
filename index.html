@@ -1,24 +1,123 @@
 <!DOCTYPE html>
 <html lang="sr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Školski dokumenti</title>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 16px; }
-    h1 { font-size: 1.6rem; }
-    h2 { font-size: 1.1rem; margin-top: 28px; color: #555; }
-    a { display: block; padding: 10px 0; font-size: 1.05rem; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Školski dokumenti</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --text:#1c1e21; --muted:#6b7280; --accent:#1d4ed8; --line:#e5e7eb; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#111317; --card:#1b1e24; --text:#e8eaed; --muted:#9aa3af; --accent:#7aa2ff; --line:#2b2f37; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; }
+  .wrap { max-width:720px; margin:0 auto; padding:32px 16px 64px; }
+  h1 { font-size:1.6rem; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 24px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; }
+  .card { display:block; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px 16px; text-decoration:none; color:var(--text); }
+  .card:hover { border-color:var(--accent); }
+  .card b { display:block; font-size:1.05rem; }
+  .card span { color:var(--muted); font-size:.9rem; }
+  .back { display:inline-block; margin-bottom:16px; color:var(--accent); text-decoration:none; }
+  .list { background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .list a { display:flex; gap:12px; align-items:center; padding:14px 16px; text-decoration:none; color:var(--text); border-top:1px solid var(--line); }
+  .list a:first-child { border-top:none; }
+  .list a:hover { background:rgba(127,127,127,.08); }
+  .num { color:var(--muted); min-width:1.6em; font-variant-numeric:tabular-nums; }
+  .msg { color:var(--muted); padding:20px 0; }
+</style>
 </head>
 <body>
-  <h1>Školski dokumenti</h1>
+<div class="wrap">
+  <h1 id="title">Školski dokumenti</h1>
+  <p class="sub" id="sub">Izaberi predmet.</p>
+  <div id="app"><p class="msg">Učitavanje…</p></div>
+</div>
 
-  <h2>Fizika</h2>
-  <a href="fizika/Talasi_1.pdf">Talasi – rezime</a>
+<script>
+/* ---- Podešavanja (obično ne treba ništa da menjaš) ----
+   Na adresi korisnik.github.io/repo/ sajt sam prepozna korisnika i repo.
+   Ako koristiš svoj domen ili ne radi, upiši ručno: */
+const CONFIG = { owner: "ddcuber2010", repo: "Skolske-materijale", branch: "main" };
 
-  <h2>Praksa</h2>
-  <a href="Praksa_A/Materijal_1.pdf">Materijal 1</a>
-  <a href="Izvuceno%20sve%20sto%20je%20obelezeno%20iz%20materijal%20od%20djurice.pdf">Izvučeno sve što je označeno iz materijala od Điurice</a>
+const SKIP = new Set([".github", "assets", "node_modules"]);   // folderi koji se ne prikazuju
+const host = location.hostname;
+const owner = CONFIG.owner || (host.endsWith(".github.io") ? host.split(".")[0] : "");
+const repo  = CONFIG.repo  || (host.endsWith(".github.io") ? location.pathname.split("/")[1] : "");
+
+const app = document.getElementById("app");
+const title = document.getElementById("title");
+const sub = document.getElementById("sub");
+let subjects = {};   // { "fizika": ["fizika/01_Talasi.pdf", ...], "": [root pdfs] }
+
+const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+const href = path => path.split("/").map(encodeURIComponent).join("/");
+
+function pretty(name) {                 // "01_Talasi_rezime.pdf" -> "Talasi rezime"
+  return name.replace(/\.pdf$/i, "").replace(/^\d+[\s._-]*/, "").replace(/_/g, " ").trim() || name;
+}
+function prettyFolder(f) {
+  if (!f) return "Ostalo";
+  const t = f.replace(/_/g, " ");
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+async function load() {
+  if (!owner || !repo) {
+    app.innerHTML = '<p class="msg">Ne mogu da prepoznam repozitorijum. Upiši svoje korisničko ime i ime repoa u CONFIG na vrhu skripte.</p>';
+    return;
+  }
+  try {
+    const r = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${CONFIG.branch}?recursive=1`);
+    if (!r.ok) throw new Error(r.status);
+    const data = await r.json();
+    for (const item of data.tree) {
+      if (item.type !== "blob" || !/\.pdf$/i.test(item.path)) continue;
+      const parts = item.path.split("/");
+      if (SKIP.has(parts[0])) continue;
+      const folder = parts.length > 1 ? parts[0] : "";
+      (subjects[folder] ||= []).push(item.path);
+    }
+    for (const k in subjects) subjects[k].sort((a, b) => collator.compare(a.split("/").pop(), b.split("/").pop()));
+    render();
+  } catch (e) {
+    app.innerHTML = '<p class="msg">Ne mogu da učitam listu dokumenata (' + esc(String(e.message)) + '). Probaj da osvežiš stranu za par minuta.</p>';
+  }
+}
+
+function render() {
+  const key = decodeURIComponent(location.hash.slice(1));
+  if (key && subjects[key === "_ostalo" ? "" : key]) return renderSubject(key === "_ostalo" ? "" : key);
+  renderHome();
+}
+
+function renderHome() {
+  title.textContent = "Školski dokumenti";
+  sub.textContent = "Izaberi predmet.";
+  document.title = "Školski dokumenti";
+  const keys = Object.keys(subjects).filter(k => k).sort(collator.compare);
+  if (subjects[""]) keys.push("");
+  if (!keys.length) { app.innerHTML = '<p class="msg">Još nema dokumenata.</p>'; return; }
+  app.innerHTML = '<div class="grid">' + keys.map(k => {
+    const n = subjects[k].length;
+    return `<a class="card" href="#${k ? encodeURIComponent(k) : "_ostalo"}"><b>${esc(prettyFolder(k))}</b><span>${n} ${n === 1 ? "dokument" : "dokumenata"}</span></a>`;
+  }).join("") + "</div>";
+}
+
+function renderSubject(k) {
+  const name = prettyFolder(k);
+  title.textContent = name;
+  sub.textContent = "Dokumenti po redosledu.";
+  document.title = name + " – Školski dokumenti";
+  app.innerHTML = '<a class="back" href="#">← Svi predmeti</a><div class="list">' +
+    subjects[k].map((p, i) => `<a href="${href(p)}" target="_blank" rel="noopener"><span class="num">${i + 1}.</span><span>${esc(pretty(p.split("/").pop()))}</span></a>`).join("") +
+    "</div>";
+}
+
+window.addEventListener("hashchange", () => { render(); scrollTo(0, 0); });
+load();
+</script>
 </body>
 </html>
