@@ -1,0 +1,296 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>TK linije vežba</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* layout: jedna uska kolona, gore izbor režima i teme, ispod kartica/pitanje; plava kao "linija" za napredak */
+:root{--bg:#eef2f6;--panel:#ffffff;--ink:#14202e;--muted:#566578;--line:#d3dce6;--accent:#0f6f80;--accent-ink:#ffffff;--ok:#1b7a45;--okbg:#e2f4ea;--bad:#b3261e;--badbg:#fbe7e5;--warn:#9a5b00}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1720;--panel:#17212c;--ink:#e6edf4;--muted:#93a3b6;--line:#2a3846;--accent:#4cc0d3;--accent-ink:#06222a;--ok:#5fd08b;--okbg:#12301f;--bad:#ff8b82;--badbg:#3a1a18;--warn:#f0b35a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1720;--panel:#17212c;--ink:#e6edf4;--muted:#93a3b6;--line:#2a3846;--accent:#4cc0d3;--accent-ink:#06222a;--ok:#5fd08b;--okbg:#12301f;--bad:#ff8b82;--badbg:#3a1a18;--warn:#f0b35a;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:16px;line-height:1.45;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1{font-size:1.35rem;margin:0;font-weight:700;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:.9rem;margin:2px 0 0}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tabs{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px}
+.tab{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:600;padding:8px 14px;border-radius:7px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+select{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 10px;min-width:0;max-width:100%}
+.prog{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}
+.meta{display:flex;justify-content:space-between;color:var(--muted);font-size:.85rem;gap:8px;flex-wrap:wrap}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;min-height:190px;display:flex;flex-direction:column;gap:14px}
+.topic{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:700}
+.q{font-size:1.25rem;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
+.a{font-size:1.1rem;overflow-wrap:anywhere;border-top:1px dashed var(--line);padding-top:12px}
+.hint{color:var(--muted);font-size:.9rem}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:11px 16px;border-radius:10px;cursor:pointer;min-height:44px}
+.btn.main{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ok{border-color:var(--ok);color:var(--ok)}
+.btn.no{border-color:var(--bad);color:var(--bad)}
+.btn:focus-visible,.tab:focus-visible,select:focus-visible,.opt:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.opts{display:grid;gap:8px}
+.opt{display:flex;gap:10px;text-align:left;font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:12px 14px;border-radius:10px;cursor:pointer;overflow-wrap:anywhere;align-items:flex-start}
+.opt b{font-family:"JetBrains Mono",monospace;color:var(--muted);font-weight:500;flex:none}
+.opt.right{background:var(--okbg);border-color:var(--ok)}
+.opt.wrong{background:var(--badbg);border-color:var(--bad)}
+.opt[disabled]{cursor:default}
+.res{font-size:2.4rem;font-weight:700;margin:0}
+.list{display:flex;flex-direction:column;gap:10px}
+.li{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg)}
+.li .lq{font-weight:600;font-size:.95rem}
+.li .la{color:var(--muted);font-size:.9rem}
+details{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px 14px}
+summary{cursor:pointer;font-weight:600;padding:10px 0}
+.row{padding:10px 0;border-top:1px solid var(--line)}
+.row .lq{font-weight:600;font-size:.95rem}
+.row .la{color:var(--muted);font-size:.92rem}
+.tag{display:inline-block;font-size:.72rem;border-radius:6px;padding:1px 7px;background:var(--okbg);color:var(--ok);margin-left:6px;font-weight:600}
+@media (prefers-reduced-motion:reduce){.prog i{transition:none}}
+</style>
+
+<div class="wrap">
+  <div>
+    <h1>Telekomunikacione linije</h1>
+    <p class="sub">Vežba samo za ono što je profesor označio.</p>
+  </div>
+  <div class="bar">
+    <div class="tabs" role="tablist" aria-label="Režim">
+      <button class="tab" role="tab" id="t-cards" aria-selected="true">Kartice</button>
+      <button class="tab" role="tab" id="t-quiz" aria-selected="false">Kviz</button>
+      <button class="tab" role="tab" id="t-list" aria-selected="false">Spisak</button>
+    </div>
+    <select id="topic" aria-label="Tema"></select>
+    <button class="btn" id="len" aria-pressed="true" style="min-height:40px;padding:8px 14px">Kratki odgovori: da</button>
+  </div>
+  <div id="view"></div>
+</div>
+
+<script>
+// [tema, grupa za pogrešne odgovore, pitanje, odgovor]
+var D=[
+["Sistem","s","Šta su telekomunikacije?","Prenos informacije na daljinu."],
+["Sistem","s","Kako može da se vrši prenos između predajnog i prijemnog dela?","Bežično (radio-relejna ili satelitska veza) ili žično (kablovski)."],
+["Sistem","s","Šta radi modulator?","Informaciju pretvara u električni ekvivalent i oblikuje signal tako da se prenese što kvalitetnije, uz što manje gubitke i smetnje."],
+["Sistem","s","Šta je prenosni kanal?","Medijum kroz koji se prostire informacija: slobodan prostor, kabl ili voda."],
+["Sistem","s","Koji je najčešći oblik prenosa signala?","Putem kablova, koji se zovu telekomunikacioni kablovi."],
+["Sistem","s","Koji se metal koristi kao provodnik u TK kablovima kod nas?","Bakar (Cu)."],
+["Kabl","k","Šta je parica?","Dva provodnika koja zatvaraju strujno kolo (dve međusobno upredene žile)."],
+["Kabl","k","Šta je žila?","Izolovani provodnik, osnovni element kabla."],
+["Kabl","k","Zašto se žile upredaju u parice?","Da se smanji pojava preslušavanja."],
+["Kabl","k","Šta je preslušavanje?","Neželjeno čuvenje razgovora druga dva pretplatnika iz neke druge parice u istom kablu."],
+["Kabl","k","Kako se preslušavanje dodatno smanjuje?","Upredanjem četiri žile u zvezda četvorku ili dve i dve parice u DM (Dizel-Martinovu) četvorku."],
+["Kabl","k","Koji su osnovni slojevi TK voda?","Provodnik, izolacija, omotač (neke vrste imaju i armaturu)."],
+["Kabl","k","Šta su pretplatnički vodovi?","Vodovi za vezu pretplatnika sa centralom."],
+["Kabl","k","Šta su spojni vodovi?","Vodovi za vezu centrala međusobno."],
+["Postavljanje","p","Uvlačni kablovi se postavljaju…","U kablovsku kanalizaciju ispod zemlje."],
+["Postavljanje","p","Podzemni kablovi se postavljaju…","Direktno u zemlju, u prethodno iskopan rov; armatura od upredenih čeličnih žica štiti ih od pritiska zemlje."],
+["Postavljanje","p","Podvodni kablovi se postavljaju…","Ispod vode (reke, jezera, mora, okeani); imaju znatno čvršću armaturu zbog pritiska vodenog stuba."],
+["Postavljanje","p","Vazdušni (samonosivi) vodovi se postavljaju…","Po uporištima; danas se sve ređe koriste."],
+["Oznake","o","Od čega se sastoji oznaka kabla?","Osnovna oznaka + oznaka konstrukcije jezgra + dopunska oznaka."],
+["Oznake","osn","Osnovna oznaka TK","Niskofrekventni pretplatnički kabl."],
+["Oznake","osn","Osnovna oznaka TD","Niskofrekventni kabl za mesne mreže i mrežne grupe."],
+["Oznake","osn","Osnovna oznaka TZ","Niskofrekventni završni kabl."],
+["Oznake","osn","Osnovna oznaka TI","Instalacioni kabl."],
+["Oznake","osn","Osnovna oznaka TC","Niskofrekventni kabl za centrale."],
+["Oznake","osn","Osnovna oznaka TX","Koaksijalni kabl."],
+["Oznake","osn","Osnovna oznaka TF","Simetrični visokofrekventni kabl."],
+["Oznake","osn","Osnovna oznaka TV","Visokofrekventni uvodni kabl."],
+["Oznake","o","Šta pokazuje prva brojka u oznaci konstrukcije jezgra?","Broj osnovnih elemenata u kablu (kapacitet)."],
+["Oznake","o","Šta pokazuje druga brojka u oznaci konstrukcije jezgra?","Način upredanja: 2 = parica, 4 = četvorka."],
+["Oznake","o","Šta pokazuje treća brojka u oznaci konstrukcije jezgra?","Prečnik provodnika u mm."],
+["Oznake","o","Šta znači 100 × 4 × 0,4?","100 četvorki, prečnik provodnika 0,4 mm."],
+["Oznake","o","Gde se nalaze dopunske oznake?","Iza osnovne oznake; dopunske oznake konstrukcije jezgra su na kraju oznake kabla, iza oznake jezgra."],
+["Oznake","dop","Dopunska oznaka G","Grupno užani kabl."],
+["Oznake","dop","Dopunska oznaka DM","Kabl sa DM četvorkama."],
+["Oznake","dop","Dopunska oznaka F","Kabl sa zvezda četvorkama."],
+["Oznake","dop","Dopunska oznaka R","Kabl sa posebnom vrednošću redukcionog faktora."],
+["Oznake","dop","Dopunska oznaka M","Specijalnom masom punjen kabl."],
+["Oznake","dop","Dopunska oznaka K","Kabl sa kalajisanim provodnicima."],
+["Zgrade","z","Od koliko stanova se uvod radi podzemnim kablom, uz unutrašnji kablovski izvod?","Od pet i više stanova."],
+["Zgrade","z","Gde se nalazi mesto koncentracije instalacionih vodova i unutrašnji kablovski izvod?","Na istom mestu, u izvodnom ormanu."],
+["Zgrade","z","Kako se postavlja orman za unutrašnji kablovski izvod?","U zid u prizemlju, na visini 1,6 m od poda, na suvom, osvetljenom i pristupačnom mestu."],
+["Zgrade","z","Šta se koristi u zgradama sa više od 100 stanova za prelaz na instalacione kablove?","Kablovski razdelnik ili završni nastavak, u prizemlju ili podrumu."],
+["Zgrade","z","Gde se smešta predajnik PCM uređaja?","U RACK orman u prostoriji glavnog razdelnika u telefonskoj centrali."],
+["Zgrade","z","Gde se smešta prijemni PCM uređaj?","U izvodni orman u zgradi."],
+["Zgrade","z","Čime se povezuju prijemni PCM sa korisnikom i prijemni sa predajnim PCM?","Bakarnim paricama."],
+["Pribor","pr","Šta su instalacione cevi?","Metalne ili nemetalne cevi u zid ili na zid zgrade; mehanička zaštita i lako razvođenje vodova."],
+["Pribor","pr","Koje vrste ormana se koriste za telefonsku instalaciju?","Izvodni, uvodni i razvodni."],
+["Pribor","pr","Koje vrste kutija se koriste?","Razvodne, uvodne i priključne."],
+["Pribor","pr","Koje su 3 vrste kablovskih glava?","Za spoljašnju montažu bez osigurača, za spoljašnju montažu sa osiguračem i za unutrašnju montažu bez osigurača."],
+["Pribor","pr","Čemu služi završna spojnica?","Za završavanje pretplatničkog kabla i prelazak na instalacione vodove."],
+["Pribor","pr","Čemu služe kablovski razdelnici?","U većim zgradama, za elastičan prelaz sa pretplatničkih kablova na instalacione kablove."],
+["Pribor","pr","Čemu služe letvice?","Za nastavljanje, račvanje i završavanje instalacionih kablova."],
+["ISDN i koaksijalni","i","Šta je ISDN?","Mreža koja obezbeđuje digitalnu komunikaciju od kraja do kraja, uz širok spektar službi, preko višenamenskih interfejsa."],
+["ISDN i koaksijalni","i","Kolika je brzina protoka ISDN-a?","144 kb/s = 2B + D."],
+["ISDN i koaksijalni","i","Koja je brzina B kanala i čemu služi?","64 kb/s, prenos informacije (ima ih dva)."],
+["ISDN i koaksijalni","i","Koja je brzina D kanala i čemu služi?","16 kb/s, signalizacija."],
+["ISDN i koaksijalni","i","Gde se koristi koaksijalni kabl u telefoniji u zgradama?","Za povezivanje PCM uređaja."],
+["ISDN i koaksijalni","i","Gde se još koristi koaksijalni kabl u instalacijama?","Kablovska i satelitska TV mreža i antenski sistemi (individualni i zajednički)."],
+["Optika","opt","Od čega se sastoji optičko vlakno?","Jezgro (indeks prelamanja n₁) i omotač jezgra (indeks prelamanja n₂)."],
+["Optika","opt","Po kom zakonu se svetlost prostire kroz vlakno?","Po zakonu totalne refleksije na razdvojnoj površini jezgro–omotač."],
+["Optika","opt","Koji uslov mora da važi za n₁ i n₂?","n₁ > n₂ (omotač ima manji indeks prelamanja od jezgra)."],
+["Optika","oz","Oznaka TO","Osnovna oznaka za telekomunikacioni kabl sa optičkim vlaknima."],
+["Optika","oz","Oznaka SM","Dopunska oznaka za kabl sa monomodnim vlaknima."],
+["Optika","oz","Oznaka ab","Brojna oznaka za omotač i armaturu (kao kod metalnih kablova); kod samonosivih kablova je 31."],
+["Optika","oz","Oznaka Z","Dopunska oznaka za zaštitu metalnog omotača od korozije."],
+["Optika","oz","Oznaka m","Broj cevi u jezgru kabla."],
+["Optika","oz","Oznaka T","Talasno područje (optički prozor), rimskim brojem: II = 1300 nm, III = 1500 nm."],
+["Optika","oz","Oznaka A","Brojna oznaka za slabljenje kabla u dB/km."],
+["Optika","oz","Oznaka D","Brojna oznaka za koeficijent hromatske disperzije."],
+["Optika","oz","Oznaka S","Dopunska oznaka za konstrukciju kabla (jedno ili više slova)."],
+["Optika","oz","Oznaka S = C","Kabl sa vlaknima u cevima."],
+["Optika","oz","Oznaka S = V","Kabl sa žlebovima."],
+["Optika","oz","Oznaka S = M","Punjeni kabl."],
+["Optika","oz","Oznaka S = A","Kabl sa armiranim vlaknima."],
+["Optika","oz","Oznaka S = N","Kabl bez metalnih elemenata."]
+];
+var CARDS=D.map(function(r,i){return{id:i,t:r[0],g:r[1],q:r[2],a:r[3]}});
+var SHORT=["Prenos informacije na daljinu.", "Bežično ili kablovski.", "Pretvara informaciju u električni signal.", "Medijum kroz koji ide informacija (vazduh, kabl, voda).", "Kablovi.", "Bakar (Cu).", "Dva provodnika koja zatvaraju strujno kolo.", "Izolovani provodnik.", "Manje preslušavanja.", "Čuje se tuđ razgovor iz druge parice.", "Zvezda četvorka ili DM četvorka.", "Provodnik, izolacija, omotač (+ armatura).", "Pretplatnik – centrala.", "Centrala – centrala.", "U kablovsku kanalizaciju pod zemljom.", "U rov u zemlji; čelična armatura.", "Ispod vode; jača armatura.", "Po uporištima; sve ređe.", "Osnovna + jezgro + dopunska.", "Niskofrekventni pretplatnički.", "Niskofrekventni, mesne mreže i mrežne grupe.", "Niskofrekventni završni.", "Instalacioni.", "Niskofrekventni za centrale.", "Koaksijalni.", "Simetrični visokofrekventni.", "Visokofrekventni uvodni.", "Broj elemenata (kapacitet).", "2 = parica, 4 = četvorka.", "Prečnik provodnika (mm).", "100 četvorki, 0,4 mm.", "Iza osnovne oznake / na kraju.", "Grupno užani.", "DM četvorke.", "Zvezda četvorke.", "Poseban redukcioni faktor.", "Punjen specijalnom masom.", "Kalajisani provodnici.", "Pet i više stanova.", "U izvodnom ormanu.", "U prizemlju, 1,6 m od poda, suvo i osvetljeno.", "Kablovski razdelnik ili završni nastavak.", "U RACK ormanu u centrali.", "U izvodnom ormanu u zgradi.", "Bakarnim paricama.", "Metalne ili nemetalne; mehanička zaštita.", "Izvodni, uvodni, razvodni.", "Razvodne, uvodne, priključne.", "Spoljašnja bez osigurača, spoljašnja sa osiguračem, unutrašnja bez osigurača.", "Završava pretplatnički kabl, prelaz na instalacione vodove.", "Prelaz sa pretplatničkih na instalacione kablove.", "Nastavljanje, račvanje, završavanje kablova.", "Digitalna veza od kraja do kraja.", "144 kb/s = 2B + D.", "64 kb/s, prenos informacije.", "16 kb/s, signalizacija.", "Povezivanje PCM uređaja.", "Kablovska i satelitska TV, antene.", "Jezgro (n₁) i omotač (n₂).", "Totalna refleksija.", "n₁ > n₂.", "Optički kabl.", "Monomodna vlakna.", "Omotač i armatura; samonosivi = 31.", "Zaštita od korozije.", "Broj cevi u jezgru.", "Talasno područje: II = 1300 nm, III = 1500 nm.", "Slabljenje (dB/km).", "Hromatska disperzija.", "Konstrukcija kabla (slova).", "Vlakna u cevima.", "Žlebovi.", "Punjen kabl.", "Armirana vlakna.", "Bez metalnih elemenata."];
+CARDS.forEach(function(c){c.s=SHORT[c.id]});
+function A(c){return S.short?c.s:c.a}
+var TOPICS=[];CARDS.forEach(function(c){if(TOPICS.indexOf(c.t)<0)TOPICS.push(c.t)});
+
+var KEY="tk-linije-znam";
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){return{}}}
+function save(o){try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
+var known=load();
+
+var S={mode:"cards",topic:"all",onlyNew:false,qn:10,short:true};
+var view=document.getElementById("view");
+var sel=document.getElementById("topic");
+sel.innerHTML='<option value="all">Sve teme ('+CARDS.length+')</option>'+TOPICS.map(function(t){var n=CARDS.filter(function(c){return c.t===t}).length;return'<option value="'+t+'">'+t+' ('+n+')</option>'}).join("");
+sel.onchange=function(){S.topic=sel.value;go()};
+var lenb=document.getElementById("len");
+lenb.onclick=function(){S.short=!S.short;lenb.setAttribute("aria-pressed",String(S.short));lenb.textContent="Kratki odgovori: "+(S.short?"da":"ne");go()};
+["cards","quiz","list"].forEach(function(m){document.getElementById("t-"+m).onclick=function(){S.mode=m;go()}});
+
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function pool(){return CARDS.filter(function(c){return S.topic==="all"||c.t===S.topic})}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function knownCount(list){return list.filter(function(c){return known[c.id]}).length}
+
+function go(){
+  ["cards","quiz","list"].forEach(function(m){document.getElementById("t-"+m).setAttribute("aria-selected",String(S.mode===m))});
+  if(S.mode==="cards")startCards();else if(S.mode==="quiz")startQuiz();else showList();
+}
+
+/* ---------- Kartice ---------- */
+var C={deck:[],i:0,flip:false,miss:0};
+function startCards(deckOverride){
+  var p=pool();
+  var d=deckOverride||(S.onlyNew?p.filter(function(c){return!known[c.id]}):p);
+  C={deck:shuffle(d),i:0,flip:false,miss:0};
+  drawCards();
+}
+function drawCards(){
+  var p=pool();
+  if(C.deck.length===0){
+    view.innerHTML='<div class="card"><p class="res">Sve znaš</p><p class="hint">U ovoj temi su sve kartice označene kao naučene.</p><div class="btns"><button class="btn main" id="all">Ponovi sve kartice</button></div></div>';
+    document.getElementById("all").onclick=function(){S.onlyNew=false;startCards()};return;
+  }
+  if(C.i>=C.deck.length){
+    var left=p.filter(function(c){return!known[c.id]}).length;
+    view.innerHTML='<div class="card"><p class="res">Gotovo</p><p class="hint">Naučeno u ovoj temi: '+knownCount(p)+' od '+p.length+'. Još ne znaš: '+left+'.</p><div class="btns">'+(left?'<button class="btn main" id="rep">Ponovi samo ono što ne znam</button>':'')+'<button class="btn" id="all">Sve ispočetka</button></div></div>';
+    if(left)document.getElementById("rep").onclick=function(){S.onlyNew=true;startCards()};
+    document.getElementById("all").onclick=function(){S.onlyNew=false;startCards()};return;
+  }
+  var c=C.deck[C.i];
+  var pct=Math.round(C.i/C.deck.length*100);
+  view.innerHTML=
+   '<div class="prog" aria-hidden="true"><i style="width:'+pct+'%"></i></div>'+
+   '<div class="meta"><span>Kartica '+(C.i+1)+' od '+C.deck.length+'</span><span>Naučeno u temi: '+knownCount(p)+'/'+p.length+'</span></div>'+
+   '<div class="card"><div class="topic">'+esc(c.t)+'</div><div class="q">'+esc(c.q)+'</div>'+
+   (C.flip?'<div class="a">'+esc(A(c))+'</div>':'<div class="hint">Prvo pokušaj da odgovoriš naglas, pa okreni.</div>')+'</div>'+
+   (C.flip?'<div class="btns"><button class="btn no" id="no">Ne znam</button><button class="btn ok" id="yes">Znam</button></div>':'<div class="btns"><button class="btn main" id="fl">Okreni (razmak)</button></div>');
+  if(C.flip){
+    document.getElementById("yes").onclick=function(){known[c.id]=1;save(known);C.i++;C.flip=false;drawCards()};
+    document.getElementById("no").onclick=function(){delete known[c.id];save(known);C.i++;C.flip=false;drawCards()};
+  }else document.getElementById("fl").onclick=function(){C.flip=true;drawCards()};
+}
+
+/* ---------- Kviz ---------- */
+var Q={list:[],i:0,score:0,wrong:[],answered:false,opts:[]};
+function distractors(c){
+  var same=CARDS.filter(function(x){return x.id!==c.id&&x.g===c.g&&A(x)!==A(c)});
+  var sameT=CARDS.filter(function(x){return x.id!==c.id&&x.t===c.t&&x.g!==c.g&&A(x)!==A(c)});
+  var rest=CARDS.filter(function(x){return x.id!==c.id&&x.t!==c.t&&A(x)!==A(c)});
+  var out=[];
+  shuffle(same).concat(shuffle(sameT),shuffle(rest)).forEach(function(x){if(out.length<3&&out.every(function(o){return o!==A(x)}))out.push(A(x))});
+  return out;
+}
+function startQuiz(list){
+  var p=list||shuffle(pool()).slice(0,S.qn==="all"?999:S.qn);
+  Q={list:p,i:0,score:0,wrong:[],answered:false,opts:[]};
+  drawQuiz();
+}
+function drawQuiz(){
+  if(Q.i>=Q.list.length){
+    var best=0;try{best=+localStorage.getItem("tk-best-"+S.topic+"-"+Q.list.length)||0}catch(e){}
+    if(Q.score>best){try{localStorage.setItem("tk-best-"+S.topic+"-"+Q.list.length,String(Q.score))}catch(e){}}
+    var pct=Math.round(Q.score/Q.list.length*100);
+    view.innerHTML='<div class="card"><div class="topic">Rezultat</div><p class="res">'+Q.score+' / '+Q.list.length+'</p><p class="hint">'+pct+'%'+(Q.score>best&&best>0?' · novi najbolji rezultat (bio je '+best+')':best>0?' · najbolji rezultat: '+best:'')+'</p></div>'+
+      (Q.wrong.length?'<div class="list">'+Q.wrong.map(function(c){return'<div class="li"><div class="lq">'+esc(c.q)+'</div><div class="la">'+esc(A(c))+'</div></div>'}).join("")+'</div>':'')+
+      '<div class="btns">'+(Q.wrong.length?'<button class="btn main" id="rw">Ponovi pogrešne ('+Q.wrong.length+')</button>':'')+'<button class="btn'+(Q.wrong.length?'':' main')+'" id="nw">Novi kviz</button></div>'+
+      '<div class="hint">Broj pitanja: <select id="qn" aria-label="Broj pitanja"><option value="10">10</option><option value="20">20</option><option value="all">sva</option></select></div>';
+    document.getElementById("qn").value=String(S.qn);
+    document.getElementById("qn").onchange=function(){S.qn=this.value==="all"?"all":+this.value};
+    if(Q.wrong.length)document.getElementById("rw").onclick=function(){startQuiz(shuffle(Q.wrong))};
+    document.getElementById("nw").onclick=function(){startQuiz()};
+    return;
+  }
+  var c=Q.list[Q.i];
+  if(!Q.answered)Q.opts=shuffle([A(c)].concat(distractors(c)));
+  var pct=Math.round(Q.i/Q.list.length*100);
+  view.innerHTML='<div class="prog" aria-hidden="true"><i style="width:'+pct+'%"></i></div>'+
+   '<div class="meta"><span>Pitanje '+(Q.i+1)+' od '+Q.list.length+'</span><span>Tačno: '+Q.score+'</span></div>'+
+   '<div class="card"><div class="topic">'+esc(c.t)+'</div><div class="q">'+esc(c.q)+'</div>'+
+   '<div class="opts">'+Q.opts.map(function(o,k){return'<button class="opt" data-k="'+k+'"'+(Q.answered?' disabled':'')+'><b>'+(k+1)+'</b><span>'+esc(o)+'</span></button>'}).join("")+'</div></div>'+
+   '<div class="btns" id="nx"></div>';
+  var btns=view.querySelectorAll(".opt");
+  btns.forEach(function(b){b.onclick=function(){pick(+b.getAttribute("data-k"))}});
+}
+var picked=-1;
+function pick(k){
+  if(Q.answered)return;
+  var c=Q.list[Q.i];Q.answered=true;picked=k;
+  var ok=Q.opts[k]===A(c);
+  if(ok)Q.score++;else Q.wrong.push(c);
+  if(ok){known[c.id]=1;save(known)}
+  var btns=view.querySelectorAll(".opt");
+  btns.forEach(function(b,j){b.disabled=true;if(Q.opts[j]===A(c))b.classList.add("right");else if(j===k)b.classList.add("wrong")});
+  var nx=document.getElementById("nx");
+  nx.innerHTML='<button class="btn main" id="next">'+(Q.i+1<Q.list.length?'Dalje (Enter)':'Rezultat')+'</button>';
+  document.getElementById("next").onclick=function(){Q.i++;Q.answered=false;drawQuiz()};
+  document.getElementById("next").focus();
+}
+
+/* ---------- Spisak ---------- */
+function showList(){
+  var p=pool();var groups=TOPICS.filter(function(t){return S.topic==="all"||t===S.topic});
+  view.innerHTML='<div class="meta"><span>Sve označeno, po temama</span><span>Naučeno: '+knownCount(p)+'/'+p.length+'</span></div>'+
+   groups.map(function(t){
+     var items=CARDS.filter(function(c){return c.t===t});
+     return'<details'+(groups.length===1?' open':'')+'><summary>'+esc(t)+' ('+items.length+')</summary>'+items.map(function(c){return'<div class="row"><div class="lq">'+esc(c.q)+(known[c.id]?'<span class="tag">znam</span>':'')+'</div><div class="la">'+esc(A(c))+'</div></div>'}).join("")+'</details>';
+   }).join("")+
+   '<div class="btns"><button class="btn" id="rst">Obriši označeno „znam“</button></div>';
+  document.getElementById("rst").onclick=function(){known={};save(known);showList()};
+}
+
+document.addEventListener("keydown",function(e){
+  if(e.target&&(e.target.tagName==="SELECT"))return;
+  if(S.mode==="cards"&&C.i<C.deck.length&&C.deck.length){
+    if(e.key===" "){e.preventDefault();if(!C.flip){C.flip=true;drawCards()}}
+    else if(C.flip&&(e.key==="ArrowRight")){document.getElementById("yes").click()}
+    else if(C.flip&&(e.key==="ArrowLeft")){document.getElementById("no").click()}
+  }else if(S.mode==="quiz"&&Q.i<Q.list.length){
+    if(!Q.answered&&/^[1-4]$/.test(e.key)&&+e.key<=Q.opts.length)pick(+e.key-1);
+    else if(Q.answered&&e.key==="Enter"){var n=document.getElementById("next");if(n&&e.target!==n)n.click()}
+  }
+});
+go();
+</script>
+
+</body></html>
