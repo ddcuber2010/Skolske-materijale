@@ -1,6 +1,9 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="sr">
+<head>
 <title>TK linije vežba</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
 <style>
 /* layout: jedna uska kolona, gore izbor režima i teme, ispod kartica/pitanje; plava kao "linija" za napredak */
@@ -49,7 +52,15 @@ summary{cursor:pointer;font-weight:600;padding:10px 0}
 .row .la{color:var(--muted);font-size:.92rem}
 .tag{display:inline-block;font-size:.72rem;border-radius:6px;padding:1px 7px;background:var(--okbg);color:var(--ok);margin-left:6px;font-weight:600}
 @media (prefers-reduced-motion:reduce){.prog i{transition:none}}
+
+.hub-back{display:inline-block;margin:12px 0 0 24px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--accent);font:600 14px/1.2 Inter,system-ui,sans-serif;text-decoration:none}
+.hub-back:hover{border-color:var(--accent)}
 </style>
+</head>
+<body>
+<a class="hub-back" id="hubBack" href="../">← Nazad na dokumente</a>
+<script>(function(){var p=location.pathname.split("/").filter(Boolean);var f=p.length>1?p[p.length-2]:"";if(f)document.getElementById("hubBack").href="../#"+encodeURIComponent(decodeURIComponent(f));})();</script>
+
 
 <div class="wrap">
   <div>
@@ -293,4 +304,5 @@ document.addEventListener("keydown",function(e){
 go();
 </script>
 
-</body></html>
+</body>
+</html>
