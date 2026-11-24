@@ -26,6 +26,10 @@
   .list a:hover { background:rgba(127,127,127,.08); }
   .num { color:var(--muted); min-width:1.6em; font-variant-numeric:tabular-nums; }
   .tag { margin-left:auto; font-size:.75rem; color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:2px 8px; }
+  .sec { font-size:.95rem; font-weight:600; color:var(--muted); margin:22px 4px 8px; text-transform:none; }
+  .sec:first-of-type { margin-top:0; }
+  .list + .sec { margin-top:22px; }
+  .card em { display:block; font-style:normal; color:var(--muted); font-size:.8rem; margin-top:4px; }
   .msg { color:var(--muted); padding:20px 0; }
 </style>
 <script>
@@ -83,7 +87,7 @@ function pretty(name) {                 // "01_Talasi_rezime.pdf" -> "Talasi rez
 }
 function prettyFolder(f) {
   if (!f) return "Ostalo";
-  const t = f.replace(/_/g, " ");
+  const t = f.replace(/^\d+[\s._-]*/, "").replace(/_/g, " ").trim() || f;
   return t.charAt(0).toUpperCase() + t.slice(1);
 }
 
@@ -126,18 +130,34 @@ function renderHome() {
   if (!keys.length) { app.innerHTML = '<p class="msg">Još nema dokumenata.</p>'; return; }
   app.innerHTML = '<div class="grid">' + keys.map(k => {
     const n = subjects[k].length;
-    return `<a class="card" href="#${k ? encodeURIComponent(k) : "_ostalo"}"><b>${esc(prettyFolder(k))}</b><span>${n} ${n === 1 ? "dokument" : "dokumenata"}</span></a>`;
+    const subs = [...new Set(subjects[k].map(p => p.split("/")).filter(a => a.length > 2).map(a => a[1]))].sort(collator.compare).map(prettyFolder);
+    return `<a class="card" href="#${k ? encodeURIComponent(k) : "_ostalo"}"><b>${esc(prettyFolder(k))}</b><span>${n} ${n === 1 ? "dokument" : "dokumenata"}</span>${subs.length ? "<em>" + esc(subs.join(" · ")) + "</em>" : ""}</a>`;
   }).join("") + "</div>";
+}
+
+function fileRow(p, i) {
+  const isHtml = /\.html?$/i.test(p);
+  return `<a href="${href(p)}"${isHtml ? "" : ' target="_blank" rel="noopener"'}><span class="num">${i + 1}.</span><span>${esc(pretty(p.split("/").pop()))}</span>${isHtml ? '<span class="tag">vežba</span>' : ""}</a>`;
 }
 
 function renderSubject(k) {
   const name = prettyFolder(k);
   title.textContent = name;
-  sub.textContent = "Dokumenti po redosledu.";
   document.title = name + " – Školski dokumenti";
-  app.innerHTML = '<a class="back" href="#">← Svi predmeti</a><div class="list">' +
-    subjects[k].map((p, i) => `<a href="${href(p)}"${/\.html?$/i.test(p) ? "" : ' target="_blank" rel="noopener"'}><span class="num">${i + 1}.</span><span>${esc(pretty(p.split("/").pop()))}</span>${/\.html?$/i.test(p) ? '<span class="tag">vežba</span>' : ""}</a>`).join("") +
-    "</div>";
+  // grupisanje po podfolderima (bilo koje dubine): "" = fajlovi direktno u folderu
+  const groups = {};
+  for (const p of subjects[k]) {
+    const rel = p.split("/").slice(k ? 1 : 0, -1).join("/");
+    (groups[rel] ||= []).push(p);
+  }
+  const rels = Object.keys(groups).sort((a, b) => (a === "" ? -1 : b === "" ? 1 : collator.compare(a, b)));
+  sub.textContent = rels.length > 1 || rels[0] ? "Podfolderi i dokumenti po redosledu." : "Dokumenti po redosledu.";
+  let html = '<a class="back" href="#">← Svi predmeti</a>';
+  for (const rel of rels) {
+    if (rel) html += `<h2 class="sec">${esc(rel.split("/").map(prettyFolder).join(" / "))}</h2>`;
+    html += '<div class="list">' + groups[rel].map(fileRow).join("") + "</div>";
+  }
+  app.innerHTML = html;
 }
 
 window.addEventListener("hashchange", () => { render(); scrollTo(0, 0); });
