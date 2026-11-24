@@ -28,6 +28,28 @@
   .tag { margin-left:auto; font-size:.75rem; color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:2px 8px; }
   .msg { color:var(--muted); padding:20px 0; }
 </style>
+<script>
+/* GoatCounter - upiši svoj kod (deo pre .goatcounter.com) */
+const GC_CODE = "davidskola";
+(function(){
+  if (GC_CODE === "YOUR-CODE") return;
+  window.goatcounter = { no_onload: true };
+  const s = document.createElement("script");
+  s.async = true; s.src = "https://gc.zgo.at/count.js";
+  s.setAttribute("data-goatcounter", "https://" + GC_CODE + ".goatcounter.com/count");
+  s.onload = () => {
+    const hit = () => goatcounter.count({ path: location.pathname + location.hash, title: document.title });
+    hit();
+    addEventListener("hashchange", hit);
+    document.addEventListener("click", e => {          // klik na PDF / HTML dokument
+      const a = e.target.closest("a[href]");
+      if (a && /\.(pdf|html?)$/i.test(a.pathname))
+        goatcounter.count({ path: decodeURIComponent(a.pathname), title: "otvoren: " + a.textContent.trim(), event: true });
+    });
+  };
+  document.head.appendChild(s);
+})();
+</script>
 </head>
 <body>
 <div class="wrap">
